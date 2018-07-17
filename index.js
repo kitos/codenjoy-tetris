@@ -1,5 +1,5 @@
 const WebSocket = require('ws')
-const strategy = require('./strategy.js')
+const { strategy } = require('./strategy.js')
 
 // const SERVER_HOST = 'ec2-54-88-40-91.compute-1.amazonaws.com'
 const SERVER_HOST = '192.168.88.110'

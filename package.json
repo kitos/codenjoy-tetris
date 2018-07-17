@@ -6,20 +6,21 @@
   "scripts": {
     "start": "node index.js",
     "develop": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
-  "keywords": [
-    "codenjoy",
-    "tetris",
-    "nodejs",
-    "client"
-  ],
+  "prettier": {
+    "singleQuote": true,
+    "semi": false
+  },
+  "keywords": ["codenjoy", "tetris", "nodejs", "client"],
   "author": "Nikita Kirsanov <kitos.kirsanov@epam.com>",
   "license": "ISC",
   "dependencies": {
+    "ramda": "^0.25.0",
     "ws": "^5.2.1"
   },
   "devDependencies": {
+    "jest": "^23.4.1",
     "nodemon": "^1.17.5"
   }
 }
