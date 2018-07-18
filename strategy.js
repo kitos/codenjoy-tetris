@@ -31,11 +31,13 @@ let Figure = {
   L: 'L'
 }
 
+// карта фигур
+// содержит координаты точек фигуры относительно оси вращения для всех положений
 let shapes = {
   I: [
-    [[0, 1], [0, 0], [0, -1], [0, -2]],
-    [[1, 0], [0, 0], [-1, 0], [-2, 0]],
-    [[0, 1], [0, 0], [0, -1], [0, 2]],
+    [[0, 1], [0, 0], [0, -1], [0, -2]], // нулевое вращение
+    [[1, 0], [0, 0], [-1, 0], [-2, 0]], // 90 градусов по часовой
+    [[0, 1], [0, 0], [0, -1], [0, 2]], // ...
     [[1, 0], [0, 0], [-1, 0], [2, 0]]
   ],
   O: [
@@ -58,6 +60,14 @@ let shapes = {
   ]
 }
 
+/**
+ * Определяет влазит ли указанная фигурка по данным координатам в стакан.
+ *
+ * Возвращает true, если хотя бы одна точка фигуры выходит за пределы стакана, иначе false.
+ *
+ * @param figure тип фигуры
+ * @param position позиция центра фигуры (точки вращения) и положение этой фигуры
+ */
 let hasGlassCollision = curry((figure, { x, y, rotation }) =>
   shapes[figure][rotation].some(
     ([cellRelativeX, cellRelativeY]) =>
@@ -68,23 +78,37 @@ let hasGlassCollision = curry((figure, { x, y, rotation }) =>
   )
 )
 
-let hasFiguresCollision = curry((glassString, figure, { x, y, rotation }) =>
+/**
+ * Определяет пересечение фигуры по заданным координатам с уже лежащими фигурами в стакане.
+ *
+ * Возвращает true, если хотя бы одна точка фигуры пересекается с лежащими фигурами в стакане, иначе false.
+ *
+ * @param glass строка стакана
+ * @param figure тип фигуры
+ * @param position позиция центра фигуры (точки вращения) и положение этой фигуры
+ */
+let hasFiguresCollision = curry((glass, figure, { x, y, rotation }) =>
   shapes[figure][rotation].some(
     ([cellRelativeX, cellRelativeY]) =>
-      glassString.charAt(
-        x + cellRelativeX + GLASS_WIDTH * (y + cellRelativeY)
-      ) === GlassState.BUSY
+      glass.charAt(x + cellRelativeX + GLASS_WIDTH * (y + cellRelativeY)) ===
+      GlassState.BUSY
   )
 )
 
+/**
+ * Определяет можно ли опустить фигуру в заданное положение.
+ *
+ * Если напути (сверху вниз) хотя бы одна точка фигуры пересекается с лежащими элементами возвращает false, иначе true.
+ *
+ * @param glass строка стакана
+ * @param figure тип фигуры
+ * @param position позиция центра фигуры (точки вращения) и положение этой фигуры
+ */
 let canDrop = curry((glassString, figure, { y, ...position }) =>
   range(y, GLASS_HEIGHT - 1).every(
     y => !hasFiguresCollision(glassString)(figure, { ...position, y })
   )
 )
-
-let buildCollision = glass =>
-  allPass([complement(hasGlassCollision), canDrop(glass)])
 
 // метод, говорящий что делать той или иной фигурке figure с координарами x,y в стакане glass. next - очередь следущих фигурок
 let strategy = (figure, currentX, currentY, glass, next) => {
@@ -104,10 +128,10 @@ let strategy = (figure, currentX, currentY, glass, next) => {
     }
   }
 
-  let collision = buildCollision(glass)
-
   let orderedSolutions = pipe(
-    filter(step => collision(figure, step)),
+    filter(
+      allPass([complement(hasGlassCollision(figure)), canDrop(glass, figure)])
+    ),
     sortWith([
       ascend(prop('y')),
       ascend(({ rotation }) =>
