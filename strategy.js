@@ -110,7 +110,16 @@ let canDrop = curry((glassString, figure, { y, ...position }) =>
   )
 )
 
-// метод, говорящий что делать той или иной фигурке figure с координарами x,y в стакане glass. next - очередь следущих фигурок
+/**
+ * Основной метод бота, говорит что нужно делать с фигуркой.
+ *
+ * @param figure текущая фигурка
+ * @param currentX x координата фигурки
+ * @param currentY y координата фигурки
+ * @param glass строка состояния стакана
+ * @param next очередь следующих фигуров
+ * @returns {string} команда перемещения
+ */
 let strategy = (figure, currentX, currentY, glass, next) => {
   // add "drop" to response when you need to drop a figure
   // for details please check http://codenjoy.com/portal/?p=170#commands
