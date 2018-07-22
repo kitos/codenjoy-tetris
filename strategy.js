@@ -123,12 +123,12 @@ let canDrop = curry((glassString, figure, { y, ...position }) =>
 let strategy = (figure, currentX, currentY, glass, next) => {
   // add "drop" to response when you need to drop a figure
   // for details please check http://codenjoy.com/portal/?p=170#commands
-  let steps = []
+  let solutions = []
 
   for (let x = 0; x < GLASS_WIDTH; x++) {
     for (let y = 0; y < GLASS_HEIGHT; y++) {
       for (let rotation = 0; rotation < 4; rotation++) {
-        steps.push({
+        solutions.push({
           x,
           y,
           rotation
@@ -148,7 +148,7 @@ let strategy = (figure, currentX, currentY, glass, next) => {
       ),
       ascend(prop('x'))
     ])
-  )(steps)
+  )(solutions)
 
   let { x, rotation } = orderedSolutions[0]
 
