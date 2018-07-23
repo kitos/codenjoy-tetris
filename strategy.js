@@ -7,7 +7,9 @@ const {
   allPass,
   range,
   complement,
-  curry
+  curry,
+  chain,
+  head
 } = require('ramda')
 
 let GlassState = {
@@ -23,6 +25,13 @@ const DO_NOT_ROTATE = 0 // не вращать фигурку
 const ROTATE_90_CLOCKWISE = 1 // повернуть по часовой стрелке один раз
 const ROTATE_180_CLOCKWISE = 2 // повернуть по часовой стрелке два раза
 const ROTATE_90_COUNTERCLOCKWISE = 3 // повернуть против часовой стрелки 1 раз (3 по часовой)
+
+let rotations = [
+  DO_NOT_ROTATE,
+  ROTATE_90_CLOCKWISE,
+  ROTATE_180_CLOCKWISE,
+  ROTATE_90_COUNTERCLOCKWISE
+]
 
 let Figure = {
   I: 'I',
@@ -123,21 +132,24 @@ let canDrop = curry((glassString, figure, { y, ...position }) =>
 let strategy = (figure, currentX, currentY, glass, next) => {
   // add "drop" to response when you need to drop a figure
   // for details please check http://codenjoy.com/portal/?p=170#commands
-  let solutions = []
+  let solutions = chain(
+    x =>
+      chain(
+        y =>
+          chain(
+            rotation => ({
+              x,
+              y,
+              rotation
+            }),
+            rotations
+          ),
+        range(0, GLASS_HEIGHT)
+      ),
+    range(0, GLASS_WIDTH)
+  )
 
-  for (let x = 0; x < GLASS_WIDTH; x++) {
-    for (let y = 0; y < GLASS_HEIGHT; y++) {
-      for (let rotation = 0; rotation < 4; rotation++) {
-        solutions.push({
-          x,
-          y,
-          rotation
-        })
-      }
-    }
-  }
-
-  let orderedSolutions = pipe(
+  let bestSolution = pipe(
     filter(
       allPass([complement(hasGlassCollision(figure)), canDrop(glass, figure)])
     ),
@@ -147,12 +159,13 @@ let strategy = (figure, currentX, currentY, glass, next) => {
         Math.min(...shapes[figure][rotation].map(([x, y]) => y))
       ),
       ascend(prop('x'))
-    ])
+    ]),
+    head
   )(solutions)
 
-  let { x, rotation } = orderedSolutions[0]
-
-  return `left=${currentX - x}, rotate=${rotation}, drop`
+  return `left=${currentX - bestSolution.x}, rotate=${
+    bestSolution.rotation
+  }, drop`
 }
 
 module.exports = {
