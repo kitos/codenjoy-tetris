@@ -141,19 +141,14 @@ let canDrop = curry((glassString, figure, { y, ...position }) =>
 )
 
 /**
- * Основной метод бота, говорит что нужно делать с фигуркой.
+ * Возвращает массив все возможных положений фигуры вида: [{ x: 1, y: 2, rotation: 3 }...]
  *
- * @param figure текущая фигурка
- * @param currentX x координата фигурки
- * @param currentY y координата фигурки
- * @param glass строка состояния стакана
- * @param next очередь следующих фигуров
- * @returns {string} команда перемещения
+ * Где x и y это координаты центра фигуры (оси вращения),
+ * а rotation позиция фигуры (0-3).
+ *
  */
-let strategy = (figure, currentX, currentY, glass, next) => {
-  // add "drop" to response when you need to drop a figure
-  // for details please check http://codenjoy.com/portal/?p=170#commands
-  let solutions = chain(
+let generateAllPossibleSolutions = () =>
+  chain(
     x =>
       chain(
         y =>
@@ -169,6 +164,21 @@ let strategy = (figure, currentX, currentY, glass, next) => {
       ),
     range(0, GLASS_WIDTH)
   )
+
+/**
+ * Основной метод бота, говорит что нужно делать с фигуркой.
+ *
+ * @param figure текущая фигурка
+ * @param currentX x координата фигурки
+ * @param currentY y координата фигурки
+ * @param glass строка состояния стакана
+ * @param next очередь следующих фигуров
+ * @returns {string} команда перемещения
+ */
+let strategy = (figure, currentX, currentY, glass, next) => {
+  // add "drop" to response when you need to drop a figure
+  // for details please check http://codenjoy.com/portal/?p=170#commands
+  let solutions = generateAllPossibleSolutions()
 
   let bestSolution = pipe(
     filter(
