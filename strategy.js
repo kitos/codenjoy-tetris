@@ -10,14 +10,16 @@ const {
   curry,
   chain,
   head,
-  tap
+  memoizeWith
 } = require('ramda')
 const { shapes } = require('./figure')
 const {
   GLASS_HEIGHT,
   GLASS_WIDTH,
   GlassState,
-  toOneDimensional
+  toOneDimensional,
+  addFigure,
+  closedCellsCount
 } = require('./glass')
 
 const DO_NOT_ROTATE = 0 // не вращать фигурку
@@ -126,7 +128,16 @@ let strategy = (figure, currentX, currentY, glass, next) => {
     filter(
       allPass([complement(hasGlassCollision(figure)), canDrop(glass, figure)])
     ),
-    sortWith([ascend(prop('y')), ascend(prop('x'))]),
+    sortWith([
+      ascend(
+        memoizeWith(
+          JSON.stringify,
+          pipe(addFigure(glass, figure), closedCellsCount)
+        )
+      ),
+      ascend(prop('y')),
+      ascend(prop('x'))
+    ]),
     head
   )(solutions)
 
