@@ -2,8 +2,16 @@ const {
   Figure,
   hasGlassCollision,
   hasFiguresCollision,
-  canDrop
+  canDrop,
+  strategy
 } = require('../strategy')
+
+let rotateGlass = glassString =>
+  glassString
+    .replace(/\r?\n|\r/g, '')
+    .match(/.{1,10}/g)
+    .reverse()
+    .join('')
 
 describe('strategy', () => {
   let center = { x: 4, y: 9 }
@@ -44,7 +52,7 @@ describe('strategy', () => {
   })
 
   describe('#hasFiguresCollision', () => {
-    let glassWithBorderAndOInCenter = `
+    let glassWithBorderAndOInCenter = rotateGlass(`
 **********
 *        *
 *        *
@@ -65,11 +73,7 @@ describe('strategy', () => {
 *        *
 *        *
 **********
-`
-      .replace(/\r?\n|\r/g, '')
-      .split('')
-      .reverse()
-      .join('')
+`)
     let hasCollisionWithBordersOrO = hasFiguresCollision(
       glassWithBorderAndOInCenter
     )
@@ -98,6 +102,68 @@ describe('strategy', () => {
           expect(
             hasCollisionWithBordersOrO(figure, { ...center, rotation: 0 })
           ).toBe(true))
+      })
+    })
+  })
+
+  describe('#strategy', () => {
+    describe('obvious solutions', () => {
+      it('J', () => {
+        let emptyGlass = rotateGlass(`
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+ *********
+ *********
+`)
+
+        expect(strategy('J', 0, 19, emptyGlass, '')).toBe(
+          'rotate=2, left=0, drop'
+        )
+      })
+
+      it('L', () => {
+        let emptyGlass = rotateGlass(`
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+********* 
+********* 
+`)
+
+        expect(strategy('L', 9, 19, emptyGlass, '')).toBe(
+          'rotate=2, left=0, drop'
+        )
       })
     })
   })
