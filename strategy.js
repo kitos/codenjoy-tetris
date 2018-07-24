@@ -9,18 +9,17 @@ const {
   complement,
   curry,
   chain,
-  head
+  head,
+  tap
 } = require('ramda')
-const { replaceWith } = require('./string')
+const { shapes } = require('./figure')
+const { GLASS_HEIGHT, GLASS_WIDTH, toOneDimensional } = require('./glass')
 
 let GlassState = {
   // из этих символов состоит строка glass
   EMPTY: ' ', // так выглядит свободное место в стакане
   BUSY: '*' // а тут уже занято
 }
-
-const GLASS_WIDTH = 10
-const GLASS_HEIGHT = 20
 
 const DO_NOT_ROTATE = 0 // не вращать фигурку
 const ROTATE_90_CLOCKWISE = 1 // повернуть по часовой стрелке один раз
@@ -33,65 +32,6 @@ let rotations = [
   ROTATE_180_CLOCKWISE,
   ROTATE_90_COUNTERCLOCKWISE
 ]
-
-let Figure = {
-  I: 'I',
-  O: 'O',
-  J: 'J',
-  L: 'L',
-  S: 'S',
-  Z: 'Z',
-  T: 'T'
-}
-
-// карта фигур
-// содержит координаты точек фигуры относительно оси вращения для всех положений
-let shapes = {
-  I: [
-    [[0, 1], [0, 0], [0, -1], [0, -2]], // нулевое вращение
-    [[1, 0], [0, 0], [-1, 0], [-2, 0]], // 90 градусов по часовой
-    [[0, 1], [0, 0], [0, -1], [0, 2]], // ...
-    [[1, 0], [0, 0], [-1, 0], [2, 0]]
-  ],
-  O: [
-    [[0, 0], [1, 0], [1, -1], [0, -1]],
-    [[0, 0], [0, -1], [-1, -1], [-1, 0]],
-    [[0, 0], [-1, 0], [-1, 1], [0, 1]],
-    [[0, 0], [0, 1], [1, 1], [1, 0]]
-  ],
-  J: [
-    [[0, 0], [0, 1], [0, -1], [-1, -1]],
-    [[0, 0], [-1, 1], [-1, 0], [1, 0]],
-    [[0, 0], [0, 1], [1, 1], [0, -1]],
-    [[0, 0], [-1, 0], [1, 0], [1, -1]]
-  ],
-  L: [
-    [[0, 0], [0, 1], [0, -1], [1, -1]],
-    [[0, 0], [-1, -1], [-1, 0], [1, 0]],
-    [[0, 0], [0, 1], [-1, 1], [0, -1]],
-    [[0, 0], [-1, 0], [1, 0], [1, 1]]
-  ],
-  S: [
-    [[0, 0], [-1, 0], [0, 1], [1, 1]],
-    [[0, 0], [0, 1], [1, 0], [1, -1]],
-    [[0, 0], [-1, -1], [0, -1], [1, 0]],
-    [[0, 0], [1, 1], [-1, 0], [0, -1]]
-  ],
-  Z: [
-    [[0, 0], [-1, 1], [0, 1], [1, 0]],
-    [[0, 0], [1, 1], [1, 0], [0, -1]],
-    [[0, 0], [-1, 0], [0, -1], [1, -1]],
-    [[0, 0], [0, 1], [-1, 0], [-1, -1]]
-  ],
-  T: [
-    [[0, 0], [-1, 0], [0, 1], [1, 0]],
-    [[0, 0], [0, 1], [1, 0], [0, -1]],
-    [[0, 0], [-1, 0], [1, 0], [0, -1]],
-    [[0, 0], [-1, 0], [0, 1], [0, -1]]
-  ]
-}
-
-let toOneDimensional = (x, y) => x + GLASS_WIDTH * y
 
 /**
  * Определяет влазит ли указанная фигурка по данным координатам в стакан.
@@ -140,21 +80,6 @@ let hasFiguresCollision = curry((glass, figure, { x, y, rotation }) =>
 let canDrop = curry((glassString, figure, { y, ...position }) =>
   range(y, GLASS_HEIGHT - 1).every(
     y => !hasFiguresCollision(glassString)(figure, { ...position, y })
-  )
-)
-
-/**
- * Добавляет фигуру в стакан по указанной позиции, возвращает новый стакан.
- */
-let addFigure = curry((glassString, figure, { x, y, rotation }) =>
-  shapes[figure][rotation].reduce(
-    (result, [cellRelativeX, cellRelativeY]) =>
-      replaceWith(
-        result,
-        '*',
-        toOneDimensional(x + cellRelativeX, y + cellRelativeY)
-      ),
-    glassString
   )
 )
 
@@ -211,10 +136,8 @@ let strategy = (figure, currentX, currentY, glass, next) => {
 }
 
 module.exports = {
-  Figure,
   strategy,
   hasGlassCollision,
   hasFiguresCollision,
-  canDrop,
-  addFigure
+  canDrop
 }
