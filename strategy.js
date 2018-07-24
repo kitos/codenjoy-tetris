@@ -11,6 +11,7 @@ const {
   chain,
   head
 } = require('ramda')
+const { replaceWith } = require('./string')
 
 let GlassState = {
   // из этих символов состоит строка glass
@@ -90,6 +91,8 @@ let shapes = {
   ]
 }
 
+let toOneDimensional = (x, y) => x + GLASS_WIDTH * y
+
 /**
  * Определяет влазит ли указанная фигурка по данным координатам в стакан.
  *
@@ -120,7 +123,7 @@ let hasGlassCollision = curry((figure, { x, y, rotation }) =>
 let hasFiguresCollision = curry((glass, figure, { x, y, rotation }) =>
   shapes[figure][rotation].some(
     ([cellRelativeX, cellRelativeY]) =>
-      glass.charAt(x + cellRelativeX + GLASS_WIDTH * (y + cellRelativeY)) ===
+      glass.charAt(toOneDimensional(x + cellRelativeX, y + cellRelativeY)) ===
       GlassState.BUSY
   )
 )
@@ -137,6 +140,21 @@ let hasFiguresCollision = curry((glass, figure, { x, y, rotation }) =>
 let canDrop = curry((glassString, figure, { y, ...position }) =>
   range(y, GLASS_HEIGHT - 1).every(
     y => !hasFiguresCollision(glassString)(figure, { ...position, y })
+  )
+)
+
+/**
+ * Добавляет фигуру в стакан по указанной позиции, возвращает новый стакан.
+ */
+let addFigure = curry((glassString, figure, { x, y, rotation }) =>
+  shapes[figure][rotation].reduce(
+    (result, [cellRelativeX, cellRelativeY]) =>
+      replaceWith(
+        result,
+        '*',
+        toOneDimensional(x + cellRelativeX, y + cellRelativeY)
+      ),
+    glassString
   )
 )
 
@@ -197,5 +215,6 @@ module.exports = {
   strategy,
   hasGlassCollision,
   hasFiguresCollision,
-  canDrop
+  canDrop,
+  addFigure
 }
