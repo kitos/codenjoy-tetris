@@ -20,11 +20,10 @@ let rotateGlass = glassString =>
     .reverse()
     .join('')
 
-let allCoordinates = () =>
-  chain(
-    x => chain(y => ({ x, y }), range(0, GLASS_HEIGHT)),
-    range(0, GLASS_WIDTH)
-  )
+let allCoordinates = chain(
+  x => chain(y => ({ x, y }), range(0, GLASS_HEIGHT)),
+  range(0, GLASS_WIDTH)
+)
 
 /**
  * Добавляет фигуру в стакан по указанной позиции, возвращает новый стакан.
@@ -53,7 +52,6 @@ let isEmpty = (glassString, { x, y }) =>
  */
 let closedCellsCount = glassString =>
   pipe(
-    allCoordinates,
     map(coords => {
       if (isEmpty(glassString, coords)) {
         const hasBusyCellAbove = range(coords.y, GLASS_HEIGHT).some(
@@ -66,7 +64,7 @@ let closedCellsCount = glassString =>
       return 0
     }),
     sum
-  )()
+  )(allCoordinates)
 
 module.exports = {
   GLASS_HEIGHT,

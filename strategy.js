@@ -85,29 +85,28 @@ let canDrop = curry((glassString, figure, { y, ...position }) =>
 )
 
 /**
- * Возвращает массив все возможных положений фигуры вида: [{ x: 1, y: 2, rotation: 3 }...]
+ * Массив все возможных положений фигуры вида: [{ x: 1, y: 2, rotation: 3 }...]
  *
  * Где x и y это координаты центра фигуры (оси вращения),
  * а rotation позиция фигуры (0-3).
  *
  */
-let generateAllPossibleSolutions = () =>
-  chain(
-    x =>
-      chain(
-        y =>
-          chain(
-            rotation => ({
-              x,
-              y,
-              rotation
-            }),
-            rotations
-          ),
-        range(0, GLASS_HEIGHT)
-      ),
-    range(0, GLASS_WIDTH)
-  )
+let allPossibleSolutions = chain(
+  x =>
+    chain(
+      y =>
+        chain(
+          rotation => ({
+            x,
+            y,
+            rotation
+          }),
+          rotations
+        ),
+      range(0, GLASS_HEIGHT)
+    ),
+  range(0, GLASS_WIDTH)
+)
 
 /**
  * Основной метод бота, говорит что нужно делать с фигуркой.
@@ -120,10 +119,6 @@ let generateAllPossibleSolutions = () =>
  * @returns {string} команда перемещения
  */
 let strategy = (figure, currentX, currentY, glass, next) => {
-  // add "drop" to response when you need to drop a figure
-  // for details please check http://codenjoy.com/portal/?p=170#commands
-  let solutions = generateAllPossibleSolutions()
-
   let bestSolution = pipe(
     filter(
       allPass([complement(hasGlassCollision(figure)), canDrop(glass, figure)])
@@ -139,7 +134,7 @@ let strategy = (figure, currentX, currentY, glass, next) => {
       ascend(prop('x'))
     ]),
     head
-  )(solutions)
+  )(allPossibleSolutions)
 
   return `rotate=${bestSolution.rotation}, left=${currentX -
     bestSolution.x}, drop`
