@@ -1,8 +1,7 @@
-const { rotateGlass, addFigure } = require('../glass')
+const { rotateGlass, addFigure, closedCellsCount } = require('../glass')
 
 describe('glass', () => {
-  describe('#addFigure', () => {
-    let emptyGlass = rotateGlass(`
+  let emptyGlass = rotateGlass(`
           
           
           
@@ -25,6 +24,7 @@ describe('glass', () => {
           
 `)
 
+  describe('#addFigure', () => {
     it('should add figure correctly', () => {
       let newGlass = addFigure(emptyGlass, 'O', { x: 0, y: 1, rotation: 0 })
 
@@ -106,6 +106,68 @@ describe('glass', () => {
 ******  **
 `)
       )
+    })
+  })
+
+  describe('#closedCellsCount', () => {
+    it('should return 0 for empty glass', () => {
+      expect(closedCellsCount(emptyGlass)).toBe(0)
+    })
+
+    it('should count closed cells', () => {
+      expect(
+        closedCellsCount(
+          rotateGlass(`
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+**  *  *  
+  ** ** **
+`)
+        )
+      ).toBe(4)
+
+      expect(
+        closedCellsCount(
+          rotateGlass(`
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+** ****** 
+ *****  * 
+** *** ***
+`)
+        )
+      ).toBe(5)
     })
   })
 })

@@ -1,4 +1,4 @@
-const { curry } = require('ramda')
+const { curry, chain, range, pipe, sum, map } = require('ramda')
 const { replaceWith } = require('./string')
 const { shapes } = require('./figure')
 
@@ -20,6 +20,12 @@ let rotateGlass = glassString =>
     .reverse()
     .join('')
 
+let allCoordinates = () =>
+  chain(
+    x => chain(y => ({ x, y }), range(0, GLASS_HEIGHT)),
+    range(0, GLASS_WIDTH)
+  )
+
 /**
  * Добавляет фигуру в стакан по указанной позиции, возвращает новый стакан.
  */
@@ -35,11 +41,39 @@ let addFigure = curry((glassString, figure, { x, y, rotation }) =>
   )
 )
 
+let isEmpty = (glassString, { x, y }) =>
+  glassString.charAt(toOneDimensional(x, y)) === GlassState.EMPTY
+
+/**
+ * Возвращает количество закрытых ячеек.
+ * Закрытой является свободная ячейка, над которой есть хотя бы одна занятая.
+ *
+ * @param glassString стакан
+ * @returns {number} количесво закрытых ячеек
+ */
+let closedCellsCount = glassString =>
+  pipe(
+    allCoordinates,
+    map(coords => {
+      if (isEmpty(glassString, coords)) {
+        const hasBusyCellAbove = range(coords.y, GLASS_HEIGHT).some(
+          y => !isEmpty(glassString, { ...coords, y })
+        )
+
+        return hasBusyCellAbove ? 1 : 0
+      }
+
+      return 0
+    }),
+    sum
+  )()
+
 module.exports = {
   GLASS_HEIGHT,
   GLASS_WIDTH,
   GlassState,
   addFigure,
   toOneDimensional,
-  rotateGlass
+  rotateGlass,
+  closedCellsCount
 }
