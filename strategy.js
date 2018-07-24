@@ -188,9 +188,8 @@ let strategy = (figure, currentX, currentY, glass, next) => {
     head
   )(solutions)
 
-  return `left=${currentX - bestSolution.x}, rotate=${
-    bestSolution.rotation
-  }, drop`
+  return `rotate=${bestSolution.rotation}, left=${currentX -
+    bestSolution.x}, drop`
 }
 
 module.exports = {
