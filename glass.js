@@ -5,6 +5,12 @@ const { shapes } = require('./figure')
 const GLASS_WIDTH = 10
 const GLASS_HEIGHT = 20
 
+let GlassState = {
+  // из этих символов состоит строка glass
+  EMPTY: ' ', // так выглядит свободное место в стакане
+  BUSY: '*' // а тут уже занято
+}
+
 let toOneDimensional = (x, y) => x + GLASS_WIDTH * y
 
 let rotateGlass = glassString =>
@@ -22,7 +28,7 @@ let addFigure = curry((glassString, figure, { x, y, rotation }) =>
     (result, [cellRelativeX, cellRelativeY]) =>
       replaceWith(
         result,
-        '*',
+        GlassState.BUSY,
         toOneDimensional(x + cellRelativeX, y + cellRelativeY)
       ),
     glassString
@@ -32,6 +38,7 @@ let addFigure = curry((glassString, figure, { x, y, rotation }) =>
 module.exports = {
   GLASS_HEIGHT,
   GLASS_WIDTH,
+  GlassState,
   addFigure,
   toOneDimensional,
   rotateGlass

@@ -13,13 +13,12 @@ const {
   tap
 } = require('ramda')
 const { shapes } = require('./figure')
-const { GLASS_HEIGHT, GLASS_WIDTH, toOneDimensional } = require('./glass')
-
-let GlassState = {
-  // из этих символов состоит строка glass
-  EMPTY: ' ', // так выглядит свободное место в стакане
-  BUSY: '*' // а тут уже занято
-}
+const {
+  GLASS_HEIGHT,
+  GLASS_WIDTH,
+  GlassState,
+  toOneDimensional
+} = require('./glass')
 
 const DO_NOT_ROTATE = 0 // не вращать фигурку
 const ROTATE_90_CLOCKWISE = 1 // повернуть по часовой стрелке один раз
