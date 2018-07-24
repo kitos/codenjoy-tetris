@@ -18,6 +18,9 @@ wsClient.on('message', message => {
     /^figure=(\w+)&x=(\d+)&y=(\d+)&glass=(.*)&next=(\w*)$/
   )
   let parameters = message.match(pattern)
+
+  console.time('PROCESSING_TIME')
+
   let result = strategy(
     parameters[1],
     parameters[2],
@@ -28,6 +31,7 @@ wsClient.on('message', message => {
 
   console.log('RAW_MESSAGE: ' + message)
   console.log('YOUR_RESPONSE: ' + result)
+  console.timeEnd('PROCESSING_TIME')
 
   wsClient.send(result)
 })
