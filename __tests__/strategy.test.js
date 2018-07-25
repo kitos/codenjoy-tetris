@@ -2,10 +2,10 @@ const {
   hasGlassCollision,
   hasFiguresCollision,
   isEqSolutions,
-  strategy
+  findBestSolution
 } = require('../strategy')
 const { Figure } = require('../figure')
-const { rotateGlass } = require('../glass')
+const { rotateGlass, addFigure } = require('../glass')
 
 describe('strategy', () => {
   let center = { x: 4, y: 9 }
@@ -125,10 +125,21 @@ describe('strategy', () => {
     })
   })
 
-  describe('#strategy', () => {
+  describe('#findBestSolution', () => {
     describe('obvious solutions', () => {
+      let figure
+      let before
+      let after
+
+      afterEach(() =>
+        expect(
+          addFigure(before, figure, findBestSolution(figure, before, ''))
+        ).toEqual(after)
+      )
+
       it('J', () => {
-        let emptyGlass = rotateGlass(`
+        figure = 'J'
+        before = rotateGlass(`
           
           
           
@@ -150,14 +161,33 @@ describe('strategy', () => {
  *********
  *********
 `)
-
-        expect(strategy('J', 0, 19, emptyGlass, '')).toBe(
-          'rotate=2, left=0, drop'
-        )
+        after = rotateGlass(`
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+**        
+**********
+**********
+`)
       })
 
       it('L', () => {
-        let emptyGlass = rotateGlass(`
+        figure = 'L'
+        before = rotateGlass(`
           
           
           
@@ -179,10 +209,28 @@ describe('strategy', () => {
 ********* 
 ********* 
 `)
-
-        expect(strategy('L', 9, 19, emptyGlass, '')).toBe(
-          'rotate=2, left=0, drop'
-        )
+        after = rotateGlass(`
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+        **
+**********
+**********
+`)
       })
     })
   })
