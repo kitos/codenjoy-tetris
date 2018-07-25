@@ -127,18 +127,8 @@ let isEqSolutions = figure =>
     isEmpty
   )
 
-/**
- * Основной метод бота, говорит что нужно делать с фигуркой.
- *
- * @param figure текущая фигурка
- * @param currentX x координата фигурки
- * @param currentY y координата фигурки
- * @param glass строка состояния стакана
- * @param next очередь следующих фигуров
- * @returns {string} команда перемещения
- */
-let strategy = (figure, currentX, currentY, glass, next) => {
-  let bestSolution = pipe(
+let findBestSolution = (figure, glass, next) =>
+  pipe(
     tap(pipe(prop('length'), console.log)),
     filter(
       allPass([complement(hasGlassCollision(figure)), canDrop(glass, figure)])
@@ -158,6 +148,19 @@ let strategy = (figure, currentX, currentY, glass, next) => {
     ]),
     head
   )(allPossibleSolutions)
+
+/**
+ * Основной метод бота, говорит что нужно делать с фигуркой.
+ *
+ * @param figure текущая фигурка
+ * @param currentX x координата фигурки
+ * @param currentY y координата фигурки
+ * @param glass строка состояния стакана
+ * @param next очередь следующих фигуров
+ * @returns {string} команда перемещения
+ */
+let strategy = (figure, currentX, currentY, glass, next) => {
+  let bestSolution = findBestSolution(figure, glass, next)
 
   return `rotate=${bestSolution.rotation}, left=${currentX -
     bestSolution.x}, drop`
