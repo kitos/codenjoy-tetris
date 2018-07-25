@@ -1,4 +1,9 @@
-const { rotateGlass, addFigure, closedCellsCount } = require('../glass')
+const {
+  rotateGlass,
+  addFigure,
+  closedCellsCount,
+  linesWillBeRemoved
+} = require('../glass')
 
 describe('glass', () => {
   let emptyGlass = rotateGlass(`
@@ -168,6 +173,67 @@ describe('glass', () => {
 `)
         )
       ).toBe(5)
+    })
+  })
+
+  describe('#linesWillBeRemoved', () => {
+    it('should return 0 for empty glass', () =>
+      expect(linesWillBeRemoved(emptyGlass)).toBe(0))
+
+    it('should count lines to remove', () => {
+      expect(
+        linesWillBeRemoved(
+          rotateGlass(`
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+**********
+**********
+`)
+        )
+      ).toBe(2)
+
+      expect(
+        linesWillBeRemoved(
+          rotateGlass(`
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+**********
+***  *****
+**********
+****** ***
+`)
+        )
+      ).toBe(2)
     })
   })
 })

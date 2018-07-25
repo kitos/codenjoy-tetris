@@ -66,6 +66,15 @@ let closedCellsCount = glassString =>
     sum
   )(allCoordinates)
 
+let linesWillBeRemoved = glassString =>
+  range(0, GLASS_HEIGHT).reduce((sum, y) => {
+    if (range(0, GLASS_WIDTH).every(x => !isEmpty(glassString, { x, y }))) {
+      return sum + 1
+    }
+
+    return sum
+  }, 0)
+
 module.exports = {
   GLASS_HEIGHT,
   GLASS_WIDTH,
@@ -73,5 +82,6 @@ module.exports = {
   addFigure,
   toOneDimensional,
   rotateGlass,
-  closedCellsCount
+  closedCellsCount,
+  linesWillBeRemoved
 }
