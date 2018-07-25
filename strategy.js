@@ -167,6 +167,7 @@ let strategy = (figure, currentX, currentY, glass, next) => {
 }
 
 module.exports = {
+  strategy,
   findBestSolution,
   hasGlassCollision,
   hasFiguresCollision,
