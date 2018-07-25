@@ -10,7 +10,11 @@ const {
   curry,
   chain,
   head,
-  memoizeWith
+  memoizeWith,
+  uniqWith,
+  differenceWith,
+  isEmpty,
+  tap
 } = require('ramda')
 const { shapes } = require('./figure')
 const {
@@ -108,6 +112,21 @@ let allPossibleSolutions = chain(
   range(0, GLASS_WIDTH)
 )
 
+let isEqSolutions = figure =>
+  pipe(
+    (
+      { x: x1, y: y1, rotation: rotation1 },
+      { x: x2, y: y2, rotation: rotation2 }
+    ) =>
+      differenceWith(
+        ([rX1, rY1], [rX2, rY2]) =>
+          x1 + rX1 === x2 + rX2 && y1 + rY1 === y1 + rY2,
+        shapes[figure][rotation1],
+        shapes[figure][rotation2]
+      ),
+    isEmpty
+  )
+
 /**
  * Основной метод бота, говорит что нужно делать с фигуркой.
  *
@@ -120,9 +139,13 @@ let allPossibleSolutions = chain(
  */
 let strategy = (figure, currentX, currentY, glass, next) => {
   let bestSolution = pipe(
+    tap(pipe(prop('length'), console.log)),
     filter(
       allPass([complement(hasGlassCollision(figure)), canDrop(glass, figure)])
     ),
+    tap(pipe(prop('length'), console.log)),
+    uniqWith(isEqSolutions(figure)),
+    tap(pipe(prop('length'), console.log)),
     sortWith([
       ascend(
         memoizeWith(
@@ -144,5 +167,6 @@ module.exports = {
   strategy,
   hasGlassCollision,
   hasFiguresCollision,
-  canDrop
+  canDrop,
+  isEqSolutions
 }

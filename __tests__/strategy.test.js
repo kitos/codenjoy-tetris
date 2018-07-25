@@ -1,6 +1,7 @@
 const {
   hasGlassCollision,
   hasFiguresCollision,
+  isEqSolutions,
   strategy
 } = require('../strategy')
 const { Figure } = require('../figure')
@@ -96,6 +97,24 @@ describe('strategy', () => {
             hasCollisionWithBordersOrO(figure, { ...center, rotation: 0 })
           ).toBe(true))
       })
+    })
+  })
+
+  describe('#isEqSolutions', () => {
+    it('should return if solutions are equal', () => {
+      expect(
+        isEqSolutions('O')(
+          { x: 0, y: 0, rotation: 0 },
+          { x: 1, y: 0, rotation: 1 }
+        )
+      ).toBe(true)
+
+      expect(
+        isEqSolutions('O')(
+          { x: 0, y: 0, rotation: 0 },
+          { x: 1, y: 0, rotation: 2 }
+        )
+      ).toBe(true)
     })
   })
 
