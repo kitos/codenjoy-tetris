@@ -112,7 +112,14 @@ describe('strategy', () => {
       expect(
         isEqSolutions('O')(
           { x: 0, y: 0, rotation: 0 },
-          { x: 1, y: 0, rotation: 2 }
+          { x: 1, y: -1, rotation: 2 }
+        )
+      ).toBe(true)
+
+      expect(
+        isEqSolutions('O')(
+          { x: 0, y: 0, rotation: 0 },
+          { x: 0, y: -1, rotation: 3 }
         )
       ).toBe(true)
     })

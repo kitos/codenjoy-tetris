@@ -120,7 +120,7 @@ let isEqSolutions = figure =>
     ) =>
       differenceWith(
         ([rX1, rY1], [rX2, rY2]) =>
-          x1 + rX1 === x2 + rX2 && y1 + rY1 === y1 + rY2,
+          x1 + rX1 === x2 + rX2 && y1 + rY1 === y2 + rY2,
         shapes[figure][rotation1],
         shapes[figure][rotation2]
       ),
