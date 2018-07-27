@@ -129,13 +129,25 @@ describe('strategy', () => {
     describe('obvious solutions', () => {
       let figure
       let before
-      let after
+      let expected
 
-      afterEach(() =>
-        expect(
-          addFigure(before, figure, findBestSolution(figure, before, ''))
-        ).toEqual(after)
-      )
+      afterEach(() => {
+        let bestSolution = findBestSolution(figure, before, '')
+        let actual = addFigure(
+          before,
+          figure,
+          bestSolution
+        )
+
+        console.log('bestSolution')
+        console.log(bestSolution)
+        console.log('BEFORE')
+        console.log(rotateGlass(before).match(/.{1,10}/g))
+        console.log('ACTUAL')
+        console.log(rotateGlass(actual).match(/.{1,10}/g))
+
+        expect(actual).toEqual(expected)
+      })
 
       it('J', () => {
         figure = 'J'
@@ -161,7 +173,7 @@ describe('strategy', () => {
  *********
  *********
 `)
-        after = rotateGlass(`
+        expected = rotateGlass(`
           
           
           
@@ -209,7 +221,7 @@ describe('strategy', () => {
 ********* 
 ********* 
 `)
-        after = rotateGlass(`
+        expected = rotateGlass(`
           
           
           
