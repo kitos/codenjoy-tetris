@@ -50,6 +50,7 @@ let isEmpty = (glassString, { x, y }) =>
  * @param glassString стакан
  * @returns {number} количесво закрытых ячеек
  */
+  // TODO: удалять закрытые строки
 let closedCellsCount = glassString =>
   pipe(
     map(coords => {

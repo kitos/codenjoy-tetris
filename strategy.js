@@ -12,9 +12,12 @@ const {
   head,
   memoizeWith,
   uniqWith,
+  uniqBy,
+  pick,
   differenceWith,
   isEmpty,
-  tap
+  tap,
+  descend
 } = require('ramda')
 const { shapes } = require('./figure')
 const {
@@ -23,7 +26,8 @@ const {
   GlassState,
   toOneDimensional,
   addFigure,
-  closedCellsCount
+  closedCellsCount,
+  linesWillBeRemoved
 } = require('./glass')
 
 const DO_NOT_ROTATE = 0 // не вращать фигурку
@@ -129,20 +133,31 @@ let isEqSolutions = figure =>
 
 let findBestSolution = (figure, glass, next) =>
   pipe(
-    tap(pipe(prop('length'), console.log)),
+    // выбрасываем пересечения со стаканом и фигурами в нём
     filter(
       allPass([complement(hasGlassCollision(figure)), canDrop(glass, figure)])
     ),
-    tap(pipe(prop('length'), console.log)),
+    // выбрасываем решения отличающиеся только по y'ку (мы всё-равно бросаем фигурки вниз)
+    uniqBy(pick(['x', 'rotation'])),
+    // удаляем одинаковые решения (те, которые займут такие же клеточки)
+    // например если квадрат повернуть и стдвинуть по x, он замёт то же положение
     uniqWith(isEqSolutions(figure)),
-    tap(pipe(prop('length'), console.log)),
     sortWith([
+      // чем больше линий будет удалено, тем лучше
+      descend(
+        memoizeWith(
+          JSON.stringify,
+          pipe(addFigure(glass, figure), linesWillBeRemoved)
+        )
+      ),
+      // чем меньше дыр будет создано, тем лучше
       ascend(
         memoizeWith(
           JSON.stringify,
           pipe(addFigure(glass, figure), closedCellsCount)
         )
       ),
+      // чем ниже и левее мы бросим фигурку тем лучше
       ascend(prop('y')),
       ascend(prop('x'))
     ]),
