@@ -1,4 +1,28 @@
-const { curry, chain, range, pipe, sum, map } = require('ramda')
+const {
+  always,
+  curry,
+  chain,
+  range,
+  pipe,
+  sum,
+  map,
+  replace,
+  reverse,
+  join,
+  splitEvery,
+  repeat,
+  append,
+  prepend,
+  reduce,
+  ifElse,
+  equals,
+  flip,
+  call,
+  unary,
+  useWith,
+  identity,
+  countBy
+} = require('ramda')
 const { replaceWith } = require('./string')
 const { shapes } = require('./figure')
 
@@ -13,12 +37,12 @@ let GlassState = {
 
 let toOneDimensional = (x, y) => x + GLASS_WIDTH * y
 
-let rotateGlass = glassString =>
-  glassString
-    .replace(/\r?\n|\r/g, '')
-    .match(/.{1,10}/g)
-    .reverse()
-    .join('')
+let emptyLine = join('', repeat(GlassState.EMPTY, 10))
+let busyLine = join('', repeat(GlassState.BUSY, 10))
+
+let splitGlass = splitEvery(10)
+
+let rotateGlass = pipe(replace(/\r?\n|\r/g, ''), splitGlass, reverse, join(''))
 
 let allCoordinates = chain(
   x => chain(y => ({ x, y }), range(0, GLASS_HEIGHT)),
@@ -50,7 +74,6 @@ let isEmpty = (glassString, { x, y }) =>
  * @param glassString стакан
  * @returns {number} количесво закрытых ячеек
  */
-  // TODO: удалять закрытые строки
 let closedCellsCount = glassString =>
   pipe(
     map(coords => {
@@ -67,14 +90,21 @@ let closedCellsCount = glassString =>
     sum
   )(allCoordinates)
 
-let linesWillBeRemoved = glassString =>
-  range(0, GLASS_HEIGHT).reduce((sum, y) => {
-    if (range(0, GLASS_WIDTH).every(x => !isEmpty(glassString, { x, y }))) {
-      return sum + 1
-    }
+let linesWillBeRemoved = pipe(splitGlass, pipe(map(equals(busyLine)), sum))
 
-    return sum
-  }, 0)
+let removeLines = pipe(
+  splitGlass,
+  reverse,
+  reduce(
+    useWith(flip(call), [
+      identity,
+      ifElse(equals(busyLine), always(prepend(emptyLine)), unary(append))
+    ]),
+    []
+  ),
+  reverse,
+  join('')
+)
 
 module.exports = {
   GLASS_HEIGHT,
@@ -84,5 +114,6 @@ module.exports = {
   toOneDimensional,
   rotateGlass,
   closedCellsCount,
-  linesWillBeRemoved
+  linesWillBeRemoved,
+  removeLines
 }

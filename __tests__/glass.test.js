@@ -2,7 +2,8 @@ const {
   rotateGlass,
   addFigure,
   closedCellsCount,
-  linesWillBeRemoved
+  linesWillBeRemoved,
+  removeLines
 } = require('../glass')
 
 describe('glass', () => {
@@ -234,6 +235,91 @@ describe('glass', () => {
 `)
         )
       ).toBe(2)
+    })
+  })
+
+  describe('#removeLines', () => {
+    it('should leave empty glass as it was', () =>
+      expect(removeLines(emptyGlass)).toBe(emptyGlass))
+
+    it('should clear full glass', () =>
+      expect(
+        removeLines(
+          rotateGlass(`
+**********
+**********
+**********
+**********
+**********
+**********
+**********
+**********
+**********
+**********
+**********
+**********
+**********
+**********
+**********
+**********
+**********
+**********
+**********
+**********
+`)
+        )
+      ).toBe(emptyGlass))
+
+    it('should remove lines correctly', () => {
+      expect(
+        removeLines(
+          rotateGlass(`
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+         *
+**********
+******  **
+`)
+        )
+      ).toBe(
+        rotateGlass(`
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+         *
+******  **
+`)
+      )
     })
   })
 })
