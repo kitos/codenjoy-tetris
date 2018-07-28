@@ -10,14 +10,13 @@ const {
   curry,
   chain,
   head,
-  memoizeWith,
   uniqWith,
   uniqBy,
   pick,
   differenceWith,
   isEmpty,
-  tap,
-  descend
+  descend,
+  map
 } = require('ramda')
 const { shapes } = require('./figure')
 const {
@@ -143,21 +142,21 @@ let findBestSolution = (figure, glass, next) =>
     // удаляем одинаковые решения (те, которые займут такие же клеточки)
     // например если квадрат повернуть и стдвинуть по x, он замёт то же положение
     uniqWith(isEqSolutions(figure)),
+    map(p => {
+      let glassWithNewFigure = addFigure(glass, figure, p)
+      let nextGlass = removeLines(glassWithNewFigure)
+
+      return {
+        ...p,
+        removedLines: linesWillBeRemoved(glassWithNewFigure),
+        closedCells: closedCellsCount(nextGlass)
+      }
+    }),
     sortWith([
       // чем больше линий будет удалено, тем лучше
-      descend(
-        memoizeWith(
-          JSON.stringify,
-          pipe(addFigure(glass, figure), linesWillBeRemoved)
-        )
-      ),
+      descend(prop('removedLines')),
       // чем меньше дыр будет создано, тем лучше
-      ascend(
-        memoizeWith(
-          JSON.stringify,
-          pipe(addFigure(glass, figure), removeLines, closedCellsCount)
-        )
-      ),
+      ascend(prop('closedCells')),
       // чем ниже и левее мы бросим фигурку тем лучше
       ascend(prop('y')),
       ascend(prop('x'))
