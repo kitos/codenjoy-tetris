@@ -27,6 +27,7 @@ const {
   toOneDimensional,
   addFigure,
   closedCellsCount,
+  removeLines,
   linesWillBeRemoved
 } = require('./glass')
 
@@ -154,7 +155,7 @@ let findBestSolution = (figure, glass, next) =>
       ascend(
         memoizeWith(
           JSON.stringify,
-          pipe(addFigure(glass, figure), closedCellsCount)
+          pipe(addFigure(glass, figure), removeLines, closedCellsCount)
         )
       ),
       // чем ниже и левее мы бросим фигурку тем лучше
