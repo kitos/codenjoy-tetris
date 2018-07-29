@@ -183,7 +183,7 @@ let findBestSolution = (figure, glass, next) =>
  * @returns {string} команда перемещения
  */
 let strategy = (figure, currentX, currentY, glass, next) => {
-  let bestSolution = findBestSolution(figure, glass, next)
+  let bestSolution = findBestSolution(figure, glass, next.split(''))
 
   return `rotate=${bestSolution.rotation}, left=${currentX -
     bestSolution.x}, drop`
