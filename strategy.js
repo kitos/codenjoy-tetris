@@ -11,12 +11,12 @@ const {
   chain,
   head,
   uniqWith,
-  uniqBy,
-  pick,
   differenceWith,
   isEmpty,
   descend,
-  map
+  map,
+  eqProps,
+  both,
 } = require('ramda')
 const { shapes } = require('./figure')
 const {
@@ -138,7 +138,8 @@ let findBestSolution = (figure, glass, next) =>
       allPass([complement(hasGlassCollision(figure)), canDrop(glass, figure)])
     ),
     // выбрасываем решения отличающиеся только по y'ку (мы всё-равно бросаем фигурки вниз)
-    uniqBy(pick(['x', 'rotation'])),
+    uniqWith(both(eqProps('x'), eqProps('rotation'))),
+
     // удаляем одинаковые решения (те, которые займут такие же клеточки)
     // например если квадрат повернуть и стдвинуть по x, он замёт то же положение
     uniqWith(isEqSolutions(figure)),
