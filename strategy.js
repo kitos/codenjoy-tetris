@@ -17,6 +17,7 @@ const {
   map,
   eqProps,
   both,
+  memoizeWith
 } = require('ramda')
 const { shapes } = require('./figure')
 const {
@@ -147,19 +148,23 @@ let findBestSolution = (figure, glass, next) =>
       let glassWithNewFigure = addFigure(glass, figure, p)
       let nextGlass = removeLines(glassWithNewFigure)
       let removedLines = linesWillBeRemoved(glassWithNewFigure)
-      let closedCells = closedCellsCount(nextGlass)
 
       return {
         ...p,
         removedLines,
-        closedCells
+        nextGlass
       }
     }),
     sortWith([
       // чем больше линий будет удалено, тем лучше
       descend(prop('removedLines')),
       // чем меньше дыр будет создано, тем лучше
-      ascend(prop('closedCells')),
+      ascend(
+        memoizeWith(
+          JSON.stringify,
+          pipe(prop('nextGlass'), closedCellsCount)
+        )
+      ),
       // чем ниже и левее мы бросим фигурку тем лучше
       ascend(prop('y')),
       ascend(prop('x'))
