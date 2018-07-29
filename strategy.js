@@ -146,11 +146,13 @@ let findBestSolution = (figure, glass, next) =>
     map(p => {
       let glassWithNewFigure = addFigure(glass, figure, p)
       let nextGlass = removeLines(glassWithNewFigure)
+      let removedLines = linesWillBeRemoved(glassWithNewFigure)
+      let closedCells = closedCellsCount(nextGlass)
 
       return {
         ...p,
-        removedLines: linesWillBeRemoved(glassWithNewFigure),
-        closedCells: closedCellsCount(nextGlass)
+        removedLines,
+        closedCells
       }
     }),
     sortWith([
