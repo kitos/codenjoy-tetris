@@ -25,11 +25,6 @@ let rotateGlass = R.pipe(
   R.join('')
 )
 
-let allCoordinates = R.chain(
-  x => R.chain(y => ({ x, y }), R.range(0, GLASS_HEIGHT)),
-  R.range(0, GLASS_WIDTH)
-)
-
 /**
  * Добавляет фигуру в стакан по указанной позиции, возвращает новый стакан.
  */
@@ -57,19 +52,16 @@ let isEmpty = (glassString, { x, y }) =>
  */
 let closedCellsCount = glassString =>
   R.pipe(
-    R.map(coords => {
-      if (isEmpty(glassString, coords)) {
-        const hasBusyCellAbove = R.range(coords.y, GLASS_HEIGHT).some(
-          y => !isEmpty(glassString, { ...coords, y })
-        )
-
-        return hasBusyCellAbove ? 1 : 0
-      }
-
-      return 0
-    }),
+    R.map(x =>
+      R.pipe(
+        R.map(y => glassString.charAt(toOneDimensional(x, y))),
+        R.dropLastWhile(R.equals(GlassState.EMPTY)),
+        R.map(R.equals(GlassState.EMPTY)),
+        R.sum
+      )(R.range(0, GLASS_HEIGHT))
+    ),
     R.sum
-  )(allCoordinates)
+  )(R.range(0, GLASS_WIDTH))
 
 let linesWillBeRemoved = R.pipe(
   splitGlass,
