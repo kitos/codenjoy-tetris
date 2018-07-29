@@ -80,22 +80,23 @@ let canDrop = R.curry((glassString, figure, { y, ...position }) =>
  * а rotation позиция фигуры (0-3).
  *
  */
-let allPossibleSolutions = R.chain(
-  x =>
-    R.chain(
-      y =>
-        R.chain(
-          rotation => ({
-            x,
-            y,
-            rotation
-          }),
-          rotations
-        ),
-      R.range(0, GLASS_HEIGHT)
-    ),
-  R.range(0, GLASS_WIDTH)
-)
+let allPossibleSolutions = (maxY = GLASS_HEIGHT) =>
+  R.chain(
+    x =>
+      R.chain(
+        y =>
+          R.chain(
+            rotation => ({
+              x,
+              y,
+              rotation
+            }),
+            rotations
+          ),
+        R.range(0, maxY)
+      ),
+    R.range(0, GLASS_WIDTH)
+  )
 
 let isEqSolutions = figure =>
   R.pipe(
@@ -116,7 +117,10 @@ let findBestSolution = (figure, glass, next) =>
   R.pipe(
     // выбрасываем пересечения со стаканом и фигурами в нём
     R.filter(
-      R.allPass([R.complement(hasGlassCollision(figure)), canDrop(glass, figure)])
+      R.allPass([
+        R.complement(hasGlassCollision(figure)),
+        canDrop(glass, figure)
+      ])
     ),
     // выбрасываем решения отличающиеся только по y'ку (мы всё-равно бросаем фигурки вниз)
     R.uniqWith(R.both(R.eqProps('x'), R.eqProps('rotation'))),
@@ -150,7 +154,7 @@ let findBestSolution = (figure, glass, next) =>
       R.ascend(R.prop('x'))
     ]),
     R.head
-  )(allPossibleSolutions)
+  )(allPossibleSolutions(glass.lastIndexOf(GlassState.BUSY) / GLASS_WIDTH + 1))
 
 /**
  * Основной метод бота, говорит что нужно делать с фигуркой.
