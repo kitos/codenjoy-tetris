@@ -1,28 +1,4 @@
-const {
-  always,
-  curry,
-  chain,
-  range,
-  pipe,
-  sum,
-  map,
-  replace,
-  reverse,
-  join,
-  splitEvery,
-  repeat,
-  append,
-  prepend,
-  reduce,
-  ifElse,
-  equals,
-  flip,
-  call,
-  unary,
-  useWith,
-  identity,
-  countBy
-} = require('ramda')
+const R = require('ramda')
 const { replaceWith } = require('./string')
 const { shapes } = require('./figure')
 
@@ -37,22 +13,27 @@ let GlassState = {
 
 let toOneDimensional = (x, y) => x + GLASS_WIDTH * y
 
-let emptyLine = join('', repeat(GlassState.EMPTY, 10))
-let busyLine = join('', repeat(GlassState.BUSY, 10))
+let emptyLine = R.join('', R.repeat(GlassState.EMPTY, 10))
+let busyLine = R.join('', R.repeat(GlassState.BUSY, 10))
 
-let splitGlass = splitEvery(10)
+let splitGlass = R.splitEvery(10)
 
-let rotateGlass = pipe(replace(/\r?\n|\r/g, ''), splitGlass, reverse, join(''))
+let rotateGlass = R.pipe(
+  R.replace(/\r?\n|\r/g, ''),
+  splitGlass,
+  R.reverse,
+  R.join('')
+)
 
-let allCoordinates = chain(
-  x => chain(y => ({ x, y }), range(0, GLASS_HEIGHT)),
-  range(0, GLASS_WIDTH)
+let allCoordinates = R.chain(
+  x => R.chain(y => ({ x, y }), R.range(0, GLASS_HEIGHT)),
+  R.range(0, GLASS_WIDTH)
 )
 
 /**
  * Добавляет фигуру в стакан по указанной позиции, возвращает новый стакан.
  */
-let addFigure = curry((glassString, figure, { x, y, rotation }) =>
+let addFigure = R.curry((glassString, figure, { x, y, rotation }) =>
   shapes[figure][rotation].reduce(
     (result, [cellRelativeX, cellRelativeY]) =>
       replaceWith(
@@ -75,10 +56,10 @@ let isEmpty = (glassString, { x, y }) =>
  * @returns {number} количесво закрытых ячеек
  */
 let closedCellsCount = glassString =>
-  pipe(
-    map(coords => {
+  R.pipe(
+    R.map(coords => {
       if (isEmpty(glassString, coords)) {
-        const hasBusyCellAbove = range(coords.y, GLASS_HEIGHT).some(
+        const hasBusyCellAbove = R.range(coords.y, GLASS_HEIGHT).some(
           y => !isEmpty(glassString, { ...coords, y })
         )
 
@@ -87,23 +68,30 @@ let closedCellsCount = glassString =>
 
       return 0
     }),
-    sum
+    R.sum
   )(allCoordinates)
 
-let linesWillBeRemoved = pipe(splitGlass, pipe(map(equals(busyLine)), sum))
-
-let removeLines = pipe(
+let linesWillBeRemoved = R.pipe(
   splitGlass,
-  reverse,
-  reduce(
-    useWith(flip(call), [
-      identity,
-      ifElse(equals(busyLine), always(prepend(emptyLine)), unary(append))
+  R.pipe(R.map(R.equals(busyLine)), R.sum)
+)
+
+let removeLines = R.pipe(
+  splitGlass,
+  R.reverse,
+  R.reduce(
+    R.useWith(R.flip(R.call), [
+      R.identity,
+      R.ifElse(
+        R.equals(busyLine),
+        R.always(R.prepend(emptyLine)),
+        R.unary(R.append)
+      )
     ]),
     []
   ),
-  reverse,
-  join('')
+  R.reverse,
+  R.join('')
 )
 
 module.exports = {
