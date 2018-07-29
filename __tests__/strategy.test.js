@@ -128,11 +128,15 @@ describe('strategy', () => {
   describe('#findBestSolution', () => {
     describe('obvious solutions', () => {
       let figure
+      let nextFigures = []
       let before
       let expected
 
       afterEach(() => {
-        let bestSolution = findBestSolution(figure, before, '')
+        console.time('TIME')
+        let bestSolution = findBestSolution(figure, before, nextFigures)
+        console.timeEnd('TIME')
+
         let actual = addFigure(
           before,
           figure,
@@ -242,6 +246,55 @@ describe('strategy', () => {
         **
 **********
 **********
+`)
+      })
+
+      it('LJ', () => {
+        figure = 'L'
+        nextFigures = ['J',]
+        before = rotateGlass(`
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+ ******** 
+ ******** 
+ ******** 
+`)
+        expected = rotateGlass(`
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+        **
+ *********
+ *********
+ ******** 
 `)
       })
     })

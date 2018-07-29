@@ -113,7 +113,7 @@ let isEqSolutions = figure =>
     R.isEmpty
   )
 
-let findBestSolution = (figure, glass, next) =>
+let findBestSolution = (figure, glass, [next, ...rest]) =>
   R.pipe(
     // выбрасываем пересечения со стаканом и фигурами в нём
     R.filter(
@@ -132,6 +132,12 @@ let findBestSolution = (figure, glass, next) =>
       let glassWithNewFigure = addFigure(glass, figure, p)
       let nextGlass = removeLines(glassWithNewFigure)
       let removedLines = linesWillBeRemoved(glassWithNewFigure)
+
+      if (next) {
+        let bs = findBestSolution(next, nextGlass, [])
+        removedLines += bs.removedLines
+        nextGlass = bs.nextGlass
+      }
 
       return {
         ...p,
@@ -167,7 +173,7 @@ let findBestSolution = (figure, glass, next) =>
  * @returns {string} команда перемещения
  */
 let strategy = (figure, currentX, currentY, glass, next) => {
-  let bestSolution = findBestSolution(figure, glass, next.split(''))
+  let bestSolution = findBestSolution(figure, glass, next.substr(0, 2).split(''))
 
   return `rotate=${bestSolution.rotation}, left=${currentX -
     bestSolution.x}, drop`
