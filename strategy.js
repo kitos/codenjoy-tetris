@@ -1,24 +1,4 @@
-const {
-  pipe,
-  filter,
-  sortWith,
-  ascend,
-  prop,
-  allPass,
-  range,
-  complement,
-  curry,
-  chain,
-  head,
-  uniqWith,
-  differenceWith,
-  isEmpty,
-  descend,
-  map,
-  eqProps,
-  both,
-  memoizeWith
-} = require('ramda')
+const R = require('ramda')
 const { shapes } = require('./figure')
 const {
   GLASS_HEIGHT,
@@ -51,7 +31,7 @@ let rotations = [
  * @param figure тип фигуры
  * @param position позиция центра фигуры (точки вращения) и положение этой фигуры
  */
-let hasGlassCollision = curry((figure, { x, y, rotation }) =>
+let hasGlassCollision = R.curry((figure, { x, y, rotation }) =>
   shapes[figure][rotation].some(
     ([cellRelativeX, cellRelativeY]) =>
       x + cellRelativeX < 0 ||
@@ -70,7 +50,7 @@ let hasGlassCollision = curry((figure, { x, y, rotation }) =>
  * @param figure тип фигуры
  * @param position позиция центра фигуры (точки вращения) и положение этой фигуры
  */
-let hasFiguresCollision = curry((glass, figure, { x, y, rotation }) =>
+let hasFiguresCollision = R.curry((glass, figure, { x, y, rotation }) =>
   shapes[figure][rotation].some(
     ([cellRelativeX, cellRelativeY]) =>
       glass.charAt(toOneDimensional(x + cellRelativeX, y + cellRelativeY)) ===
@@ -87,8 +67,8 @@ let hasFiguresCollision = curry((glass, figure, { x, y, rotation }) =>
  * @param figure тип фигуры
  * @param position позиция центра фигуры (точки вращения) и положение этой фигуры
  */
-let canDrop = curry((glassString, figure, { y, ...position }) =>
-  range(y, GLASS_HEIGHT - 1).every(
+let canDrop = R.curry((glassString, figure, { y, ...position }) =>
+  R.range(y, GLASS_HEIGHT - 1).every(
     y => !hasFiguresCollision(glassString)(figure, { ...position, y })
   )
 )
@@ -100,11 +80,11 @@ let canDrop = curry((glassString, figure, { y, ...position }) =>
  * а rotation позиция фигуры (0-3).
  *
  */
-let allPossibleSolutions = chain(
+let allPossibleSolutions = R.chain(
   x =>
-    chain(
+    R.chain(
       y =>
-        chain(
+        R.chain(
           rotation => ({
             x,
             y,
@@ -112,39 +92,39 @@ let allPossibleSolutions = chain(
           }),
           rotations
         ),
-      range(0, GLASS_HEIGHT)
+      R.range(0, GLASS_HEIGHT)
     ),
-  range(0, GLASS_WIDTH)
+  R.range(0, GLASS_WIDTH)
 )
 
 let isEqSolutions = figure =>
-  pipe(
+  R.pipe(
     (
       { x: x1, y: y1, rotation: rotation1 },
       { x: x2, y: y2, rotation: rotation2 }
     ) =>
-      differenceWith(
+      R.differenceWith(
         ([rX1, rY1], [rX2, rY2]) =>
           x1 + rX1 === x2 + rX2 && y1 + rY1 === y2 + rY2,
         shapes[figure][rotation1],
         shapes[figure][rotation2]
       ),
-    isEmpty
+    R.isEmpty
   )
 
 let findBestSolution = (figure, glass, next) =>
-  pipe(
+  R.pipe(
     // выбрасываем пересечения со стаканом и фигурами в нём
-    filter(
-      allPass([complement(hasGlassCollision(figure)), canDrop(glass, figure)])
+    R.filter(
+      R.allPass([R.complement(hasGlassCollision(figure)), canDrop(glass, figure)])
     ),
     // выбрасываем решения отличающиеся только по y'ку (мы всё-равно бросаем фигурки вниз)
-    uniqWith(both(eqProps('x'), eqProps('rotation'))),
+    R.uniqWith(R.both(R.eqProps('x'), R.eqProps('rotation'))),
 
     // удаляем одинаковые решения (те, которые займут такие же клеточки)
     // например если квадрат повернуть и стдвинуть по x, он замёт то же положение
-    uniqWith(isEqSolutions(figure)),
-    map(p => {
+    R.uniqWith(isEqSolutions(figure)),
+    R.map(p => {
       let glassWithNewFigure = addFigure(glass, figure, p)
       let nextGlass = removeLines(glassWithNewFigure)
       let removedLines = linesWillBeRemoved(glassWithNewFigure)
@@ -155,21 +135,21 @@ let findBestSolution = (figure, glass, next) =>
         nextGlass
       }
     }),
-    sortWith([
+    R.sortWith([
       // чем больше линий будет удалено, тем лучше
-      descend(prop('removedLines')),
+      R.descend(R.prop('removedLines')),
       // чем меньше дыр будет создано, тем лучше
-      ascend(
-        memoizeWith(
+      R.ascend(
+        R.memoizeWith(
           JSON.stringify,
-          pipe(prop('nextGlass'), closedCellsCount)
+          R.pipe(R.prop('nextGlass'), closedCellsCount)
         )
       ),
       // чем ниже и левее мы бросим фигурку тем лучше
-      ascend(prop('y')),
-      ascend(prop('x'))
+      R.ascend(R.prop('y')),
+      R.ascend(R.prop('x'))
     ]),
-    head
+    R.head
   )(allPossibleSolutions)
 
 /**
