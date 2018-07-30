@@ -26,6 +26,56 @@ let rotateGlass = R.pipe(
 )
 
 /**
+ * Определяет влазит ли указанная фигурка по данным координатам в стакан.
+ *
+ * Возвращает true, если хотя бы одна точка фигуры выходит за пределы стакана, иначе false.
+ *
+ * @param figure тип фигуры
+ * @param position позиция центра фигуры (точки вращения) и положение этой фигуры
+ */
+let hasBordersCollision = R.curry((figure, { x, y, rotation }) =>
+  shapes[figure][rotation].some(
+    ([cellRelativeX, cellRelativeY]) =>
+      x + cellRelativeX < 0 ||
+      x + cellRelativeX >= GLASS_WIDTH ||
+      y + cellRelativeY < 0 ||
+      y + cellRelativeY >= GLASS_HEIGHT
+  )
+)
+
+/**
+ * Определяет пересечение фигуры по заданным координатам с уже лежащими фигурами в стакане.
+ *
+ * Возвращает true, если хотя бы одна точка фигуры пересекается с лежащими фигурами в стакане, иначе false.
+ *
+ * @param glass строка стакана
+ * @param figure тип фигуры
+ * @param position позиция центра фигуры (точки вращения) и положение этой фигуры
+ */
+let hasFiguresCollision = R.curry((glass, figure, { x, y, rotation }) =>
+  shapes[figure][rotation].some(
+    ([cellRelativeX, cellRelativeY]) =>
+      glass.charAt(toOneDimensional(x + cellRelativeX, y + cellRelativeY)) ===
+      GlassState.BUSY
+  )
+)
+
+/**
+ * Определяет можно ли опустить фигуру в заданное положение.
+ *
+ * Если напути (сверху вниз) хотя бы одна точка фигуры пересекается с лежащими элементами возвращает false, иначе true.
+ *
+ * @param glass строка стакана
+ * @param figure тип фигуры
+ * @param position позиция центра фигуры (точки вращения) и положение этой фигуры
+ */
+let canDrop = R.curry((glassString, figure, { y, ...position }) =>
+  R.range(y, GLASS_HEIGHT - 1).every(
+    y => !hasFiguresCollision(glassString)(figure, { ...position, y })
+  )
+)
+
+/**
  * Добавляет фигуру в стакан по указанной позиции, возвращает новый стакан.
  */
 let addFigure = R.curry((glassString, figure, { x, y, rotation }) =>
@@ -90,8 +140,10 @@ module.exports = {
   GLASS_HEIGHT,
   GLASS_WIDTH,
   GlassState,
+  hasBordersCollision,
+  hasFiguresCollision,
+  canDrop,
   addFigure,
-  toOneDimensional,
   rotateGlass,
   closedCellsCount,
   linesWillBeRemoved,

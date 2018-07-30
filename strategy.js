@@ -4,7 +4,8 @@ const {
   GLASS_HEIGHT,
   GLASS_WIDTH,
   GlassState,
-  toOneDimensional,
+  hasBordersCollision,
+  canDrop,
   addFigure,
   closedCellsCount,
   removeLines,
@@ -22,56 +23,6 @@ let rotations = [
   ROTATE_180_CLOCKWISE,
   ROTATE_90_COUNTERCLOCKWISE
 ]
-
-/**
- * Определяет влазит ли указанная фигурка по данным координатам в стакан.
- *
- * Возвращает true, если хотя бы одна точка фигуры выходит за пределы стакана, иначе false.
- *
- * @param figure тип фигуры
- * @param position позиция центра фигуры (точки вращения) и положение этой фигуры
- */
-let hasGlassCollision = R.curry((figure, { x, y, rotation }) =>
-  shapes[figure][rotation].some(
-    ([cellRelativeX, cellRelativeY]) =>
-      x + cellRelativeX < 0 ||
-      x + cellRelativeX >= GLASS_WIDTH ||
-      y + cellRelativeY < 0 ||
-      y + cellRelativeY >= GLASS_HEIGHT
-  )
-)
-
-/**
- * Определяет пересечение фигуры по заданным координатам с уже лежащими фигурами в стакане.
- *
- * Возвращает true, если хотя бы одна точка фигуры пересекается с лежащими фигурами в стакане, иначе false.
- *
- * @param glass строка стакана
- * @param figure тип фигуры
- * @param position позиция центра фигуры (точки вращения) и положение этой фигуры
- */
-let hasFiguresCollision = R.curry((glass, figure, { x, y, rotation }) =>
-  shapes[figure][rotation].some(
-    ([cellRelativeX, cellRelativeY]) =>
-      glass.charAt(toOneDimensional(x + cellRelativeX, y + cellRelativeY)) ===
-      GlassState.BUSY
-  )
-)
-
-/**
- * Определяет можно ли опустить фигуру в заданное положение.
- *
- * Если напути (сверху вниз) хотя бы одна точка фигуры пересекается с лежащими элементами возвращает false, иначе true.
- *
- * @param glass строка стакана
- * @param figure тип фигуры
- * @param position позиция центра фигуры (точки вращения) и положение этой фигуры
- */
-let canDrop = R.curry((glassString, figure, { y, ...position }) =>
-  R.range(y, GLASS_HEIGHT - 1).every(
-    y => !hasFiguresCollision(glassString)(figure, { ...position, y })
-  )
-)
 
 /**
  * Массив все возможных положений фигуры вида: [{ x: 1, y: 2, rotation: 3 }...]
@@ -118,7 +69,7 @@ let findBestSolution = (figure, glass, [next, ...rest]) =>
     // выбрасываем пересечения со стаканом и фигурами в нём
     R.filter(
       R.allPass([
-        R.complement(hasGlassCollision(figure)),
+        R.complement(hasBordersCollision(figure)),
         canDrop(glass, figure)
       ])
     ),
@@ -173,7 +124,11 @@ let findBestSolution = (figure, glass, [next, ...rest]) =>
  * @returns {string} команда перемещения
  */
 let strategy = (figure, currentX, currentY, glass, next) => {
-  let bestSolution = findBestSolution(figure, glass, next.substr(0, 2).split(''))
+  let bestSolution = findBestSolution(
+    figure,
+    glass,
+    next.substr(0, 2).split('')
+  )
 
   return `rotate=${bestSolution.rotation}, left=${currentX -
     bestSolution.x}, drop`
@@ -182,8 +137,6 @@ let strategy = (figure, currentX, currentY, glass, next) => {
 module.exports = {
   strategy,
   findBestSolution,
-  hasGlassCollision,
-  hasFiguresCollision,
   canDrop,
   isEqSolutions
 }
